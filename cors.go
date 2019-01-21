@@ -28,6 +28,9 @@ import (
 	"strings"
 )
 
+// 关于cors 参考: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS
+// https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest/withCredentials
+
 // Options is a configuration container to setup the CORS middleware.
 type Options struct {
 	// AllowedOrigins is a list of origins a cross-domain request can be executed from.
@@ -283,7 +286,8 @@ func (c *Cors) handlePreflight(w http.ResponseWriter, r *http.Request) {
 		c.logf("  Preflight aborted: headers '%v' not allowed", reqHeaders)
 		return
 	}
-	if c.allowedOriginsAll {
+	// see https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS#%E9%99%84%E5%B8%A6%E8%BA%AB%E4%BB%BD%E5%87%AD%E8%AF%81%E7%9A%84%E8%AF%B7%E6%B1%82
+	if c.allowedOriginsAll && !c.allowCredentials {
 		headers.Set("Access-Control-Allow-Origin", "*")
 	} else {
 		headers.Set("Access-Control-Allow-Origin", origin)
@@ -335,7 +339,8 @@ func (c *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if c.allowedOriginsAll {
+	// see https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS#%E9%99%84%E5%B8%A6%E8%BA%AB%E4%BB%BD%E5%87%AD%E8%AF%81%E7%9A%84%E8%AF%B7%E6%B1%82
+	if c.allowedOriginsAll && !c.allowCredentials {
 		headers.Set("Access-Control-Allow-Origin", "*")
 	} else {
 		headers.Set("Access-Control-Allow-Origin", origin)
